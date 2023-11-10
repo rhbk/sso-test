@@ -1,0 +1,10 @@
+---
+
+- name: Testing RHSSO
+  hosts: localhost
+  gather_facts: yes
+  vars_files:
+    - ../vars/global.yml
+
+  roles:
+    - deploy_image

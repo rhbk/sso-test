@@ -1,0 +1,3 @@
+artifacts_dir: "/tmp/tests/ansible-tests/results"
+test_executor_artifacts: "{{ artifacts_dir }}/test-executor-artifacts"
+oc_binary_path: "oc"

@@ -1,0 +1,70 @@
+---
+
+- name: Copy kubeconfig
+  copy:
+    remote_src: yes
+    src: /tmp/kubeconfig
+    dest: /tmp/tests/ansible-tests/
+
+- name: Select namespace "{{ ansible_env.OCP_PROJECT_NAME }}".
+  ansible.builtin.command: |
+    "{{ oc_binary_path }}" project "{{ ansible_env.OCP_PROJECT_NAME }}"
+  register: result
+  failed_when: result.stderr | length > 0
+
+- name: Make sure the artifacts directories exists
+  ansible.builtin.file:
+    path: "{{ test_executor_artifacts }}"
+    state: directory
+    mode: 0755
+    recurse: true
+
+- name: Run OCP image and check for log files and test results
+  block:
+    - name: Install keycloak using resource
+      ansible.builtin.command: |
+        "{{ oc_binary_path }}" apply -f configs/keycloak-resource.yaml
+      register: result
+      failed_when: result.stderr | length > 0
+
+    - name: Wait until pod is ready
+      ansible.builtin.command: |
+        "{{ oc_binary_path }}" get pods --selector component=keycloak -o custom-columns=POD:.status.containerStatuses..ready --no-headers
+      register: result
+      until: '"true" in result.stdout_lines'
+      retries: 10
+      delay: 30
+
+    - name: Fetch the pod's logs
+      kubernetes.core.k8s_log:
+        kubeconfig: "{{ ansible_env.KUBECONFIG }}"
+        api_version: v1
+        namespace: "{{ ansible_env.OCP_PROJECT_NAME }}"
+        label_selectors:
+          - app=keycloak
+      register: _pod_logs
+      retries: 10
+      delay: 20
+      until:
+        - _pod_logs is search("- Started")
+
+  always:
+    - name: Write the pod's logs to disk
+      ansible.builtin.copy:
+        dest: "{{ artifacts_dir }}/pod-log.txt"
+        content: "{{ _pod_logs }}"
+        mode: 0644
+
+    - name: Fetch the events within the namespace
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ ansible_env.KUBECONFIG }}"
+        api_version: v1
+        kind: Event
+        namespace: "{{ ansible_env.OCP_PROJECT_NAME }}"
+      register: _events
+
+    - name: Write the pod's events to disk
+      ansible.builtin.copy:
+        dest: "{{ artifacts_dir }}/events.yaml"
+        content: "{{ _events.resources }}"
+        mode: 0644
