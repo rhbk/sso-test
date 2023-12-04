@@ -5,7 +5,7 @@ ENV JUNIT_OUTPUT_DIR=/tmp/tests/ansible-tests/junit-results
 # Labels consumed by Red Hat build service
 LABEL com.redhat.component="interop-ocp-ci" \
       name="keycloakqe/interop-ocp-ci" \
-      architecture=linux/$ARCH \
+      architecture="linux/amd64" \
       io.k8s.display-name="RHBK OCP Image testing executor" \
       io.k8s.description="The RHBK OCP Image testing executor is intended to be the executor for ansible tests used during the Interop testing." \
       io.openshift.tags="rhbk,integration,interop" \
