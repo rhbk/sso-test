@@ -24,7 +24,9 @@ WORKDIR /tmp/tests/ansible-tests
 # Make Ansible happy with arbitrary UID/GID in OpenShift.
 RUN chmod g=u /etc/passwd /etc/group \
   && chgrp -R 0 /tmp \
-  && chmod -R g=u /tmp
+  && chmod -R g=u /tmp \
+  && chgrp -R 0 /usr/bin \
+  && chmod -R g=u /usr/bin 
 
 COPY . /tmp/tests/ansible-tests/
 
