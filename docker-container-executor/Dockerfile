@@ -1,9 +1,7 @@
 FROM fedora:latest
 MAINTAINER Keycloak QE <keycloak-qe@redhat.com>
-ENV OC_VERSION=stable
 ENV KUBECONFIG=/tmp/tests/ansible-tests/kubeconfig
 ENV JUNIT_OUTPUT_DIR=/tmp/tests/ansible-tests/junit-results
-
 # Labels consumed by Red Hat build service
 LABEL com.redhat.component="interop-ocp-ci" \
       name="keycloakqe/interop-ocp-ci" \
@@ -28,11 +26,6 @@ RUN chmod g=u /etc/passwd /etc/group \
   && chgrp -R 0 /tmp \
   && chmod -R g=u /tmp
 
-COPY configs/keycloak-resource.yaml /tmp/tests/ansible-tests/configs/keycloak-resource.yaml
-COPY roles/deploy_image/tasks/deploy_image.yml /tmp/tests/ansible-tests/roles/deploy_image/tasks/deploy_image.yml
-COPY roles/deploy_image/tasks/deploy_image.yml /tmp/tests/ansible-tests/roles/deploy_image/tasks/main.yml
-COPY vars/global.yml /tmp/tests/ansible-tests/vars/global.yml
-COPY ansible.cfg /tmp/tests/ansible-tests/ansible.cfg
-COPY test-ocp-ci-rhbk.yml /tmp/tests/ansible-tests/test-ocp-ci-rhbk.yml
+COPY . /tmp/tests/ansible-tests/
 
 ENTRYPOINT ["/bin/bash"]
