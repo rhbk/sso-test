@@ -8,3 +8,4 @@ spec:
   externalAccess:
     enabled: true
   instances: 1
+  DisableDefaultServiceMonitor: true
